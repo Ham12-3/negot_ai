@@ -20,3 +20,5 @@ router.get(
         res.redirect(`${process.env.CLIENT_URL}/dashboard`)
     }
 )
+
+export default router
