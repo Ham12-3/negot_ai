@@ -1,71 +1,68 @@
-import dotenv from "dotenv"
+import dotenv from "dotenv";
+dotenv.config();
 
-import express from "express"
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import mongoose from "mongoose";
+import passport from "passport";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import "./config/passport";  // Import your Passport configuration
 
-import cors from "cors"
-import helmet from "helmet"
+// Routes
+import authRoutes from "./routes/auth";
 
-import  morgan from "morgan"
-import mongoose from "mongoose"
+// Initialize express app
+const app = express();
 
-import passport from "passport"
-import session from "express-session"
-
-import MongoStore from "connect-mongo"
-
-import "./config/passport"
-
-dotenv.config()
-
-
-
-// Routes 
-
-import authRoutes from "./routes/auth"
-
-
-
-
-
-const app = express()
-
-
+// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI!)
-.then(()=> console.log("Connected to MongoDB"))
-.catch((err)=> console.error(err))
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error(err));
 
-app.use(cors())
+// Security headers middleware
+app.use(helmet());
 
-app.use(helmet())
+// Logging middleware
+app.use(morgan("dev"));
 
-app.use(morgan("dev"))
+// JSON body parser middleware
+app.use(express.json());
 
-app.use(express.json())
+// CORS setup
+app.use(cors({
+  origin: process.env.CLIENT_URL,  // Allow requests from your frontend
+  credentials: true,               // Allow credentials (cookies)
+}));
 
-
-app.use()
-app.use(passport.initialize())
-app.use(passport.session())
+// **Session middleware setup (must be before passport)**
 app.use(session({
-    secret: process.env.SESSION_SECRET!,
-    resave: false,
-    saveUninitialized:false,
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI!
-    }),
-    cookie: {
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24*60 *60*1000
-    }
-}))
+  secret: process.env.SESSION_SECRET!, // Use a strong secret from your .env file
+  resave: false,                       // Don't save session if not modified
+  saveUninitialized: false,            // Don't create session until something is stored
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI!, // MongoDB session store
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Cross-site cookie settings
+    maxAge: 24 * 60 * 60 * 1000, // 1-day expiration
+  },
+}));
 
-app.use("/auth", authRoutes)
+// Initialize Passport and restore authentication state from session
+app.use(passport.initialize());
+app.use(passport.session());
 
+// Routes
+app.use("/auth", authRoutes);
 
-const PORT = 8080
+// Set the port
+const PORT = 8080;
 
-
-app.listen(PORT, ()=> {
-    console.log(`Server is running on port ${PORT}`)
-})
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
