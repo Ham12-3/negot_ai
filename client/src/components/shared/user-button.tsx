@@ -6,6 +6,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Link from "next/link";
 import { Icons } from "./icons";
+import { logout } from "@/lib/api";
+
+import { useRouter } from "next/navigation";
+
 
 
 function googleSignIn():Promise<void> {
@@ -15,8 +19,20 @@ function googleSignIn():Promise<void> {
     })
 }
 
+
+
 export function UserButton() {
+
+    const router = useRouter()
+  
     const { user} = useCurrentUser()
+
+    
+const handleLogout = async()=> {
+    await logout()
+ window.location.reload()
+ setInterval(()=> router.push("/"), 1000)
+}
     
 return (
     <div className="flex flex-1 items-center justify-between space-x-2 m:justify-end">
@@ -72,7 +88,7 @@ return (
 
 </DropdownMenuItem>
 
-<DropdownMenuItem>
+<DropdownMenuItem onClick={handleLogout}>
 <Icons.logout className="mr-2 size-4"/>
 <span>
     Logout
