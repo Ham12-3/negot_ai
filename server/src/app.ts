@@ -14,6 +14,8 @@ import "./config/passport";  // Import your Passport configuration
 // Routes
 import authRoutes from "./routes/auth";
 
+import contractsRoute from "./routes/contract"
+
 // Initialize express app
 const app = express();
 
@@ -58,6 +60,8 @@ app.use(passport.session());
 
 // Routes
 app.use("/auth", authRoutes);
+
+app.use("/contracts", contractsRoute)
 
 // Set the port
 const PORT = 8080;
