@@ -151,8 +151,34 @@ Analyze the following ${contractType} contract and provide:
 
  const results = await aiModel.generateContent(prompt)
 
- const response = results.response
+ const response = await results.response
+let text = response.text()
 
- return response.text()
+// remove any markdowns formatting 
+text = text.replace(/```json\n?|\n?```/g, "").trim();
+
+try {
+// Attempt to fix common JSON errors
+text = text.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3'); // Ensure all keys are quoted
+text = text.replace(/:\s*"([^"]*)"([^,}\]])/g, ': "$1"$2'); // Ensure all string values are properly quoted
+text = text.replace(/,\s*}/g, "}"); // Remove trailing commas
+
+
+const analysis = JSON.parse(text)
+
+return analysis
+} catch(error) {
+console.log('Error parsing JSON', error)
+return null
+}
+
+
+const fallbackAnalysis = {
+    risks: [],
+    opportunities: [],
+    summary: "",
+    
+}
+
 }
 
