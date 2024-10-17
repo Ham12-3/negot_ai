@@ -3,7 +3,7 @@ import redis from "../config/redis"
 import { getDocument } from "pdfjs-dist"
 
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import { model } from "mongoose"
+
 
 const AI_MODEL = "gemini-pro"
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY! )

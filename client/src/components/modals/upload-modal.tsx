@@ -11,11 +11,11 @@ import { api } from "@/lib/api";
 import { useContractStore } from "@/store/zustand";
 import { useMutation } from "@tanstack/react-query";
 import React, { useCallback, useState } from "react";
-import {useDropzone} from 'react-dropzone'
-import {
-    AnimatePresence,
-    motion
-} from "framer-motion"
+import { useDropzone } from "react-dropzone";
+import { AnimatePresence, motion } from "framer-motion";
+import { FileText, Sparkles, Trash } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 interface IUploadModalProps {
   isOpen: boolean;
@@ -39,7 +39,7 @@ export function UploadModal({
     "upload" | "detecting" | "confirm" | "processing" | "done"
   >("upload");
 
-  const {mutate: detectedContractType} = useMutation({
+  const { mutate: detectedContractType } = useMutation({
     mutationFn: async ({ file }: { file: File }) => {
       const formData = new FormData();
       formData.append("contract", file);
@@ -68,9 +68,16 @@ export function UploadModal({
     },
   });
   const { mutate: uploadFile, isPending: isProcessing } = useMutation({
-    mutationFn: async ({ file, contractType }: { file: File; contractType:string }) => {
+    mutationFn: async ({
+      file,
+      contractType,
+    }: {
+      file: File;
+      contractType: string;
+    }) => {
       const formData = new FormData();
       formData.append("contract", file);
+        formData.append("contractType", contractType);
 
       const response = await api.post(`/contracts/analyze`, formData, {
         headers: {
@@ -91,86 +98,117 @@ export function UploadModal({
     },
   });
 
-  const onDrop = useCallback((acceptedFiles:File[])=> {
-    if(acceptedFiles.length > 0) {
-        setFiles(acceptedFiles)
-setError(null)
-setStep("upload")
-
-
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      setFiles(acceptedFiles);
+      setError(null);
+      setStep("upload");
     } else {
-        setError("No file selected")
-
+      setError("No file selected");
     }
-  }, [])
+  }, []);
 
-
-  const {getRootProps, getInputProps, isDragActive} = useDropzone({
-onDrop,
-accept: {
-    "application/pdf": [".pdf"],
-
-},
-maxFiles:1,
-multiple:false
-  })
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "application/pdf": [".pdf"],
+    },
+    maxFiles: 1,
+    multiple: false,
+  });
 
   const handleFileUpload = () => {
-    if(files.length > 0) {
-        setStep("detecting");
+    if (files.length > 0) {
+      setStep("detecting");
 
-        detectedContractType({ file: files[0] });
-
+      detectedContractType({ file: files[0] });
     }
-  }
+  };
 
-  const handleAnalyzeContract =() => {
-    if(files.length > 0 && detectedType) {
-        setStep("processing")
+  const handleAnalyzeContract = () => {
+    if (files.length > 0 && detectedType) {
+      setStep("processing");
 
-        uploadFile({file:files[0], contractType: detectedType})
+      uploadFile({ file: files[0], contractType: detectedType });
     }
-  }
+  };
 
-  const handleClose =()=> {
-    onClose()
-setFiles([])
-setDetectedType(null)
-setError(null)
-setStep("upload")
+  const handleClose = () => {
+    onClose();
+    setFiles([]);
+    setDetectedType(null);
+    setError(null);
+    setStep("upload");
+  };
 
-  }
+  const renderContent = () => {
+    switch (step) {
+      case "upload": {
+        return (
+          <AnimatePresence>
+            <motion.div>
+              <div
+                {...getRootProps()}
+                className={cn(
+                  "border-2 border-dashed rounded-lg p-8 mt-8 mb-4 text-center transition-colors",
+                  isDragActive
+                    ? "border-primary bg-primary/10"
+                    : "border-gray-300 hover:border-gray-400"
+                )}
+              >
+                <input {...getInputProps()} />
+                <motion.div>
+                  <FileText className="mx-auto size-16 text-primary" />
+                </motion.div>
 
+                <p className="mt-4 text-sm text-gray-600">
+                  Drag &apos; drop your contract here, or click to select a file
+                </p>
+                <p className="bg-yellow-500/30 border border-yellow-500 border-dashed text-yellow-700 p-2 rounded mt-2">
+                  Only PDF files are accepted
+                </p>
+              </div>
+              {files.length > 0 && (
+                <div className="mt-4 bg-green-500/30 border border-green-500 border-dashed text-green-700 p-2 rounded
+                flex items-center justify-between
+                ">
+                  <span>
+                    {files[0].name}
+                    <span className="text-sm text-gray-600">
+                      ({files[0].size} bytes)
+                    </span>
+                  </span>
+                  <Button variant={"ghost"} size={"sm"} className="hover:bg-green-500"
+                  onClick={()=> setFiles([])}>
+                  
+                    <Trash  className="size-5 hover:text-green-900"/>
 
-  const renderContent = ()=> {
-    switch(step) {
-        case "upload": {
-           return (
-<AnimatePresence>
-    <motion.div>
+                  </Button>
+                </div>
+              )}
+              {
+                files.length > 0 && !isProcessing && (
+                    <Button className="mt-4 w-full mb-4"
+                    onClick={handleFileUpload}
+                    >
 
-        <div {...getRootProps()}>
-<input {...getInputProps()}/>
-        </div>
-    </motion.div>
-</AnimatePresence>
-           ) 
-        }
+                        <Sparkles className="mr-2 size-4 "/>
+
+                        Analyse Contract With AI
+                    </Button>
+                )
+              }
+            </motion.div>
+          </AnimatePresence>
+        );
+      }
     }
-  }
-
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-
-
-
-<DialogContent>
-
-    {
-        renderContent()
-    }
-</DialogContent>
+      <DialogContent>{renderContent()}</DialogContent>
     </Dialog>
-  )
+  );
 }
+
