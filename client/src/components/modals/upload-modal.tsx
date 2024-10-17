@@ -12,6 +12,10 @@ import { useContractStore } from "@/store/zustand";
 import { useMutation } from "@tanstack/react-query";
 import React, { useCallback, useState } from "react";
 import {useDropzone} from 'react-dropzone'
+import {
+    AnimatePresence,
+    motion
+} from "framer-motion"
 
 interface IUploadModalProps {
   isOpen: boolean;
@@ -35,7 +39,7 @@ export function UploadModal({
     "upload" | "detecting" | "confirm" | "processing" | "done"
   >("upload");
 
-  const {data: detectedContractType} = useMutation({
+  const {mutate: detectedContractType} = useMutation({
     mutationFn: async ({ file }: { file: File }) => {
       const formData = new FormData();
       formData.append("contract", file);
@@ -64,7 +68,7 @@ export function UploadModal({
     },
   });
   const { mutate: uploadFile, isPending: isProcessing } = useMutation({
-    mutationFn: async ({ file }: { file: File }) => {
+    mutationFn: async ({ file, contractType }: { file: File; contractType:string }) => {
       const formData = new FormData();
       formData.append("contract", file);
 
@@ -113,9 +117,60 @@ multiple:false
 
   const handleFileUpload = () => {
     if(files.length > 0) {
-        setStep("detecting")
+        setStep("detecting");
 
-detectedContractType({file:files[0]})
+        detectedContractType({ file: files[0] });
+
     }
   }
+
+  const handleAnalyzeContract =() => {
+    if(files.length > 0 && detectedType) {
+        setStep("processing")
+
+        uploadFile({file:files[0], contractType: detectedType})
+    }
+  }
+
+  const handleClose =()=> {
+    onClose()
+setFiles([])
+setDetectedType(null)
+setError(null)
+setStep("upload")
+
+  }
+
+
+  const renderContent = ()=> {
+    switch(step) {
+        case "upload": {
+           return (
+<AnimatePresence>
+    <motion.div>
+
+        <div {...getRootProps()}>
+<input {...getInputProps()}/>
+        </div>
+    </motion.div>
+</AnimatePresence>
+           ) 
+        }
+    }
+  }
+
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+
+
+
+<DialogContent>
+
+    {
+        renderContent()
+    }
+</DialogContent>
+    </Dialog>
+  )
 }
