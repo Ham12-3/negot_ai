@@ -62,7 +62,7 @@ return (
     {user?.displayName}
 
 </div>
-<div className="text-sm font-medium">
+<div className="text-sm text-muted-foreground">
     {user?.email}
 
 </div>
