@@ -44,7 +44,7 @@ const pdf = await getDocument({data: fileBuffer}).promise
 
 let text = ""
 
-for(let i=0; i<pdf.numPages; i++) {
+for(let i=0; i<=pdf.numPages; i++) {
     const page = await pdf.getPage(i)
 
     const content = await page.getTextContent()

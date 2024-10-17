@@ -13,7 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AnimatePresence, motion } from "framer-motion";
-import { FileText, Sparkles, Trash } from "lucide-react";
+import { FileText, Loader2, Sparkles, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 
@@ -202,7 +202,80 @@ export function UploadModal({
           </AnimatePresence>
         );
       }
+      case "detecting" : {
+
+        return (
+
+            <AnimatePresence>
+
+            <motion.div className="flex flex-col items-center justify-center py-8">
+
+                <Loader2 className="size-16 animate-spin text-primary"/>
+                <p className="mt-4 text-lg font-semibold">
+Detecting contract type...
+                </p>
+            </motion.div>
+        </AnimatePresence>
+        )
+      
+      }
+
+      case "confirm" : {
+return (
+    <AnimatePresence>
+<motion.div>
+<div className="flex flex-col space-y-4 ">
+    <p className="font-semibold">
+        We have detected the following contract type
+        <span className="font-semibold">
+            {detectedType}
+        </span>
+    </p>
+    <p>
+        Would you like to analyze this contract with our AI?
+    </p>
+</div>
+
+<div className="flex space-x-4">
+
+    <Button
+    
+    onClick={handleAnalyzeContract}>
+
+        Yes, I want to analyze it
+    </Button>
+    <Button
+    
+    onClick={()=> setStep("upload")} 
+    
+    variant={"outline"}
+    
+    className="flex-1 ">
+
+        No, try another file
+    </Button>
+
+</div>
+
+</motion.div>
+
+    </AnimatePresence>
+)
+      }
+      case "processing": {
+        return (
+            <AnimatePresence>
+
+                <motion.div>
+
+                    waiting
+                </motion.div>
+            </AnimatePresence>
+        )
+      }
     }
+
+   
   };
 
   return (

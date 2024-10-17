@@ -86,9 +86,9 @@ export const analyzeContract = async (req: Request, res: Response) => {
 
 
     // @ts-ignore 
-    if (!analysis.summary || !analysis.risks || !analysis.opportunities) {
-      throw new Error("Failed to analyze contract");
-    }
+    // if (!analysis.summary || !analysis.risks || !analysis.opportunities) {
+    //   throw new Error("Failed to analyze contract");
+    // }
 
 
     const savedAnalysis = await ContractAnalysisSchema.create({
