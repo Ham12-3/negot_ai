@@ -8,7 +8,8 @@ export default function ContractResultsPage() {
 
     return (
        <ContractAnalysisResults
-       contractId={analysisResults._id}
+       isActive={false}
+       contractId={analysisResults?._id}
        analysisResults={analysisResults}
        
        />

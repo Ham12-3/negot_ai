@@ -28,18 +28,48 @@ export default function OverallScoreChart({
     { name: "Opportunities", value: overallScore, fill: "hsl(var(--chart-2))" },
   ];
 
-  const chartConfig ={
+  const chartConfig: ChartConfig = {
     value: {
-        value: "value",
-
+      label: "Value",
     },
     Risks: {
-        label: "Risks",
-        color: "hsl(var(--chart-1))",
+      label: "Risks",
+      color: "hsl(var(--chart-1))",
     },
     Opportunities: {
-        label: "Opportunities",
-        color: "hsl(var(--chart-2))",
+      label: "Opportunities",
+      color: "hsl(var(--chart-2))",
     },
-  }
+  } satisfies ChartConfig;
+  return (
+    <div className="w-full h-48">
+      <ChartContainer
+        config={chartConfig}
+        className="mx-auto aspect-square max-h-[250px]"
+      >
+        <PieChart>
+          <ChartTooltip cursor content={<ChartTooltipContent />} />
+          <Pie data={pieChartData} dataKey="value" nameKey="name"
+          innerRadius={60}
+     
+paddingAngle={5}
+
+          >
+            <Label
+              content={({ viewBox }) => {
+                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  return (
+                    <text>
+                      <tspan>{overallScore}%</tspan>
+                      <tspan>Score</tspan>
+                    </text>
+                  );
+                }
+              }}
+            />
+          </Pie>
+        </PieChart>
+      </ChartContainer>
+    </div>
+  );
 }
