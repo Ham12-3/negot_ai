@@ -1,5 +1,5 @@
 import { ContractAnalysis } from "@/interfaces/contract.interface";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,8 +10,15 @@ import {
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import OverallScoreChart from "./chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import {motion} from "framer-motion"
+import { motion } from "framer-motion";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
 interface IContractAnalysisResultsProps {
   analysisResults: ContractAnalysis;
   isActive: boolean;
@@ -37,28 +44,27 @@ export default function ContractAnalysisResults({
   };
 
   const scoreTrend = getScore();
-  const getSeverityColor =(severity:string) => {
-    switch(severity) {
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
       case "high":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       case "medium":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "low":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
     }
-  }
+  };
 
-
-  const getImpactColor = (impact:string) => {
-    switch(impact) {
+  const getImpactColor = (impact: string) => {
+    switch (impact) {
       case "high":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       case "medium":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "low":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
     }
-  }
+  };
 
   const renderRisksAndOpportunities = (
     items: Array<{
@@ -131,6 +137,21 @@ export default function ContractAnalysisResults({
     );
   };
 
+  const renderPremiumAccordion = (content: ReactNode) => {
+    if (isActive) {
+      return content;
+    }
+
+    return (
+      <div className="relative">
+        <div className="absolute inset-0 bg-white/50 backrdop-blur-sm z-50 flex items-center justify-center">
+          <Button variant={"outline"}>Upgrade to premium</Button>
+        </div>
+        <div className="opacity-50 ">{content}</div>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -182,75 +203,182 @@ export default function ContractAnalysisResults({
       </Card>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="summary">
-                Summary
-
-            </TabsTrigger>
-            <TabsTrigger value="risks">
-                Risks
-
-            </TabsTrigger>
-            <TabsTrigger value="opportunities">
-                Opportunities
-
-            </TabsTrigger>
-            <TabsTrigger value="details">
-                Details
-
-            </TabsTrigger>
-
-
+          <TabsTrigger value="summary">Summary</TabsTrigger>
+          <TabsTrigger value="risks">Risks</TabsTrigger>
+          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+          <TabsTrigger value="details">Details</TabsTrigger>
         </TabsList>
         <TabsContent value="summary">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Contract Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-lg leading-relaxed">
-                        This is summary of the contract
-                        {/* {analysisResults.summary}  */}
-                        </p>
-                </CardContent>
-            </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Contract Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg leading-relaxed">
+                This is summary of the contract
+                {/* {analysisResults.summary}  */}
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
         <TabsContent value="risks">
-            <Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Risks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderRisksAndOpportunities(
+                [
+                  {
+                    risk: "Hidden Risk",
+                    explanation: "Hidden Explanation",
+                    severity: "low",
+                    impact: "low",
+                  },
+                  {
+                    risk: "Hidden Risk",
+                    explanation: "Hidden Explanation",
+                    severity: "low",
+                    impact: "low",
+                  },
+                  {
+                    risk: "Hidden Risk",
+                    explanation: "Hidden Explanation",
+                    severity: "low",
+                    impact: "low",
+                  },
+                  {
+                    risk: "Hidden Risk",
+                    explanation: "Hidden Explanation",
+                    severity: "low",
+                    impact: "low",
+                  },
+                ],
+                "risks"
+              )}
+              {!isActive && (
+                <p className="mt-4 text-center text-sm text-gray-500">
+                  Upgrade to Premium to see all risks
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="opportunities">
+          <Card>
+            <CardHeader>
+              <CardTitle>Opportunities</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderRisksAndOpportunities(
+                [
+                  {
+                    opportunity: "Hidden Risk",
+                    explanation: "Hidden Explanation",
+                    severity: "low",
+                    impact: "low",
+                  },
+                  {
+                    opportunity: "Hidden Risk",
+                    explanation: "Hidden Explanation",
+                    severity: "low",
+                    impact: "low",
+                  },
+                  {
+                    opportunity: "Hidden Risk",
+                    explanation: "Hidden Explanation",
+                    severity: "low",
+                    impact: "low",
+                  },
+                  {
+                    opportunity: "Hidden Risk",
+                    explanation: "Hidden Explanation",
+                    severity: "low",
+                    impact: "low",
+                  },
+                ],
+                "opportunities"
+              )}
+              {!isActive && (
+                <p className="mt-4 text-center text-sm text-gray-500">
+                  Upgrade to Premium to see all opportunities
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="details">
+          {isActive ? (
+            <div className="grid m:grid-cols-2 gap-6">
+              <Card>
                 <CardHeader>
-                    <CardTitle>Risks</CardTitle>
+                  <CardTitle>Contract details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {renderRisksAndOpportunities([
-                        {
-                            risk: "Hidden Risk",
-                            explanation: "Hidden Explanation",
-                            severity: "low",
-                            impact: "low",
-                        },
-                        {
-                            risk: "Hidden Risk",
-                            explanation: "Hidden Explanation",
-                            severity: "low",
-                            impact: "low",
-                        },
-                        {
-                            risk: "Hidden Risk",
-                            explanation: "Hidden Explanation",
-                            severity: "low",
-                            impact: "low",
-                        },
-                        {
-                          risk: "Hidden Risk",
-                          explanation: "Hidden Explanation",
-                          severity: "low",
-                          impact: "low",
-                      },
-                       
-                    ], "risks")}
+                  <ul className="space-y-2">
+                    {analysisResults.keyClauses?.map((keyClause, index) => (
+                      <motion.li key={index} className="flex items-center">
+                        {keyClause}
+                      </motion.li>
+                    ))}
+                  </ul>
                 </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recommendations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {analysisResults.recommendations?.map(
+                      (recommendation, index) => (
+                        <motion.li key={index} className="flex items-center">
+                          {recommendation}
+                        </motion.li>
+                      )
+                    )}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Contract Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>
+                  Upgrade to premium to see detailed analysis, including key
+                  clauses and recommendations
+                </p>
+                <Button className="mt-4">Upgrade to Premium</Button>
+              </CardContent>
             </Card>
+          )}
         </TabsContent>
       </Tabs>
+      <Accordion type="single" collapsible className="mb-6">
+        {renderPremiumAccordion(
+          <>
+            <AccordionItem value="contract-details">
+              <AccordionTrigger>Contract Details</AccordionTrigger>
+              <AccordionContent>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-semibold mb-2">
+                      Duration and Termination
+                    </h3>
+                    <p>{analysisResults.contractDuration}</p>
+                    <strong>Termination Conditions</strong>
+                    <p>{analysisResults.terminationConditions}</p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </>
+        )}
+      </Accordion>
     </div>
   );
 }
