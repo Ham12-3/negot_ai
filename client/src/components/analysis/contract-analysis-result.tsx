@@ -32,8 +32,12 @@ export default function ContractAnalysisResults({
 }: IContractAnalysisResultsProps) {
   const [activeTab, setActiveTab] = useState("summary");
 
+  if(!analysisResults) {
+    return <div>No results</div>
+  }
+
   const getScore = () => {
-    const score = 54; // analysisResults.overallScore ?? 0;
+    const score = analysisResults.overallScore; // analysisResults.overallScore ?? 0;
     if (score > 70) {
       return { icon: ArrowUp, color: "text-green-500", text: "Good" };
     }
@@ -172,8 +176,8 @@ export default function ContractAnalysisResults({
             <div className="w-1/2">
               <div className="flex items-center space-x-4 mb-4">
                 <div className="text-4xl font-bold">
-                  {/* {analysisResults.overallScore ?? 0}  */}
-                  45
+                  {analysisResults.overallScore ?? 0}  
+                  
                 </div>
                 <div className={`flex items-center ${scoreTrend.color}`}>
                   <scoreTrend.icon className="size-6 mr-1" />
@@ -183,11 +187,11 @@ export default function ContractAnalysisResults({
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Risk</span>
-                  <span>34%</span>
+                  <span>{100 - analysisResults.overallScore}%</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Opportunities</span>
-                  <span>34%</span>
+                  <span>{analysisResults.overallScore}%</span>
                 </div>
               </div>
               <p className="text-sm text-gray-600 mt-4">
@@ -196,7 +200,7 @@ export default function ContractAnalysisResults({
               </p>
             </div>
             <div className="w-1/2 h-48">
-              <OverallScoreChart overallScore={78} />
+              <OverallScoreChart overallScore={analysisResults.overallScore} />
             </div>
           </div>
         </CardContent>
@@ -215,8 +219,8 @@ export default function ContractAnalysisResults({
             </CardHeader>
             <CardContent>
               <p className="text-lg leading-relaxed">
-                This is summary of the contract
-                {/* {analysisResults.summary}  */}
+            
+                {analysisResults.summary}  
               </p>
             </CardContent>
           </Card>
@@ -228,32 +232,7 @@ export default function ContractAnalysisResults({
             </CardHeader>
             <CardContent>
               {renderRisksAndOpportunities(
-                [
-                  {
-                    risk: "Hidden Risk",
-                    explanation: "Hidden Explanation",
-                    severity: "low",
-                    impact: "low",
-                  },
-                  {
-                    risk: "Hidden Risk",
-                    explanation: "Hidden Explanation",
-                    severity: "low",
-                    impact: "low",
-                  },
-                  {
-                    risk: "Hidden Risk",
-                    explanation: "Hidden Explanation",
-                    severity: "low",
-                    impact: "low",
-                  },
-                  {
-                    risk: "Hidden Risk",
-                    explanation: "Hidden Explanation",
-                    severity: "low",
-                    impact: "low",
-                  },
-                ],
+                analysisResults.risks,
                 "risks"
               )}
               {!isActive && (
@@ -272,32 +251,7 @@ export default function ContractAnalysisResults({
             </CardHeader>
             <CardContent>
               {renderRisksAndOpportunities(
-                [
-                  {
-                    opportunity: "Hidden Risk",
-                    explanation: "Hidden Explanation",
-                    severity: "low",
-                    impact: "low",
-                  },
-                  {
-                    opportunity: "Hidden Risk",
-                    explanation: "Hidden Explanation",
-                    severity: "low",
-                    impact: "low",
-                  },
-                  {
-                    opportunity: "Hidden Risk",
-                    explanation: "Hidden Explanation",
-                    severity: "low",
-                    impact: "low",
-                  },
-                  {
-                    opportunity: "Hidden Risk",
-                    explanation: "Hidden Explanation",
-                    severity: "low",
-                    impact: "low",
-                  },
-                ],
+               analysisResults.opportunities,
                 "opportunities"
               )}
               {!isActive && (
@@ -358,7 +312,7 @@ export default function ContractAnalysisResults({
           )}
         </TabsContent>
       </Tabs>
-      <Accordion type="single" collapsible className="mb-6">
+      <Accordion type="single" collapsible={true} defaultValue="" className="mb-6">
         {renderPremiumAccordion(
           <>
             <AccordionItem value="contract-details">
@@ -373,12 +327,43 @@ export default function ContractAnalysisResults({
                     <strong>Termination Conditions</strong>
                     <p>{analysisResults.terminationConditions}</p>
                   </div>
+                  <div>
+                    <h3 className="font-semibold mb-2 ">
+Legal Information
+                    </h3>
+                    <p>
+                      <strong>
+                        Legal Compliance
+                      </strong>
+                      {analysisResults.legalCompliance}
+                    </p>
+           
+                  </div>
                 </div>
               </AccordionContent>
             </AccordionItem>
           </>
         )}
       </Accordion>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Negotiation Points
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+
+          <ul className="grid m:grid-cols-2 gap-2">
+{analysisResults.negotiationPoints?.map((point,index)=> (
+  <li className="flex items-center" key={index}>
+    {point}
+
+  </li>
+))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

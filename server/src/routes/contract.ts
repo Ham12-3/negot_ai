@@ -1,7 +1,7 @@
 
 import express from "express";
 import { isAuthenticated } from "../middleware/auth";
-import { analyzeContract, detectAndConfirmContractType, uploadMiddleware } from "../controllers/contract.controller";
+import { analyzeContract, detectAndConfirmContractType, getUserContracts, uploadMiddleware } from "../controllers/contract.controller";
 import { handleErrors } from "../middleware/errors";
 
 
@@ -25,6 +25,14 @@ router.post(
     handleErrors(analyzeContract)
 )
 
+
+
+router.get(
+    "/user-contracts",
+    isAuthenticated,
+    handleErrors(getUserContracts)
+
+)
 
 
 export default router;

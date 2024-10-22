@@ -3,11 +3,14 @@ import multer from "multer";
 import { IUser } from "../models/user.model";
 import redis from "../config/redis";
 import {
-    analyzeContractWithAI,
+  analyzeContractWithAI,
   detectContractType,
   extractTextFromPDF,
 } from "../services/ai.services";
-import ContractAnalysisSchema, { IContractAnalysis } from "../models/contract.model";
+import ContractAnalysisSchema, {
+  IContractAnalysis,
+} from "../models/contract.model";
+import mongoose, { FilterQuery } from "mongoose";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -72,10 +75,8 @@ export const analyzeContract = async (req: Request, res: Response) => {
     await redis.expire(fileKey, 3600);
 
     const pdfText = await extractTextFromPDF(fileKey);
-    let analysis ;
+    let analysis;
 
-
- 
     // if (user.isPremium) {
     //     analysis = await analyzeContractWithAI(pdfText, "premium", contractType);
     //   } else {
@@ -84,27 +85,45 @@ export const analyzeContract = async (req: Request, res: Response) => {
 
     analysis = await analyzeContractWithAI(pdfText, contractType);
 
-
-    // @ts-ignore 
+    // @ts-ignore
     // if (!analysis.summary || !analysis.risks || !analysis.opportunities) {
     //   throw new Error("Failed to analyze contract");
     // }
 
-
     const savedAnalysis = await ContractAnalysisSchema.create({
+      userId: user._id,
+      contractText: pdfText,
+      contractType,
+      ...(analysis as Partial<IContractAnalysis>),
+      language: "en",
+      aiModel: "gemini-pro",
+    });
 
-        userId:user._id,
-        contractText:pdfText,
-        contractType,
-        ...analysis as Partial<IContractAnalysis>,
-        language:"en",
-        aiModel:"gemini-pro"
-    })
-
-res.json(savedAnalysis)
-
+    res.json(savedAnalysis);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to analyze contract" });
+  }
+};
+
+export const getUserContracts = async (req: Request, res: Response) => {
+  const user = req.user as IUser;
+
+  try {
+    interface QueryType {
+      userId: mongoose.Types.ObjectId;
+    }
+
+    const query: QueryType = { userId: user._id as mongoose.Types.ObjectId };
+
+    const contracts = await ContractAnalysisSchema.find(
+      query as FilterQuery<IContractAnalysis>
+    ).sort({createdAt: -1})
+
+    res.json(contracts);
+  } catch (error) {
+
+    console.error(error)
+    return res.status(500).json({ error: "Failed to get user contracts" });
   }
 };
