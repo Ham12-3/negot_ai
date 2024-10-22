@@ -81,14 +81,19 @@ export default function UserContracts() {
       cell: ({ row }) => {
         const score = parseFloat(row.getValue("overallScore"));
         return (
-          <Badge
-            className="rounded-md"
-            variant={
-              score > 75 ? "secondary" : score < 50 ? "destructive" : "default"
-            }
+            <Badge
+            className={`rounded-md ${
+              score > 75
+                ? "bg-green-500 text-white hover:bg-green-400"
+                : score < 50
+                ? "bg-red-500 text-white hover:bg-red-400"
+                : "bg-yellow-500 text-black hover:bg-yellow-400"
+            }`}
           >
             {score.toFixed(2)} Overall Score
           </Badge>
+          
+          
         );
       },
     },
