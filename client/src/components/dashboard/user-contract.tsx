@@ -23,6 +23,26 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { UploadModal } from "../modals/upload-modal";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+import Link from "next/link";
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+  } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
+
+
+  
 export default function UserContracts() {
   const { data: contracts } = useQuery<ContractAnalysis[]>({
     queryKey: ["user-contracts"],
@@ -31,13 +51,23 @@ export default function UserContracts() {
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const [isUPloadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  const contractTypeColors: { [key: string]: string } = {
+    Employment: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+    "Non-Disclosure Agreement":
+      "bg-green-100 text-green-800 hover:bg-green-200",
+    Sales: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+    Lease: "bg-emerald-100 text-emerald-800 hover:bg-emerald-200",
+    Services: "bg-pink-100 text-pink-800 hover:bg-pink-200",
+    Other: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+  };
 
   const columns: ColumnDef<ContractAnalysis>[] = [
     {
       accessorKey: "_id",
       header: ({ column }) => {
-        return <Button>Contract ID</Button>;
+        return <Button variant={"ghost"}>Contract ID</Button>;
       },
       cell: ({ row }) => (
         <div className="font-medium">{row.getValue<string>("_id")}</div>
@@ -46,11 +76,79 @@ export default function UserContracts() {
     {
       accessorKey: "overallScore",
       header: ({ column }) => {
-        return <Button>Overall Score</Button>;
+        return <Button variant={"ghost"}>Overall Score</Button>;
       },
       cell: ({ row }) => {
         const score = parseFloat(row.getValue("overallScore"));
-        return <Badge>{score.toFixed(2)} Overall Score</Badge>;
+        return (
+          <Badge
+            className="rounded-md"
+            variant={
+              score > 75 ? "secondary" : score < 50 ? "destructive" : "default"
+            }
+          >
+            {score.toFixed(2)} Overall Score
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "contractType",
+      header: "Contract Type",
+      cell: ({ row }) => {
+        const contractType = row.getValue("contractType") as string;
+        const colorClass =
+          contractTypeColors[contractType] || contractTypeColors["Other"];
+        return (
+          <Badge className={cn("rounded-md", colorClass)}>{contractType}</Badge>
+        );
+      },
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const contract = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"ghost"} className="size-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <Link href={`/dashboard/contract/${contract._id}`}>
+                  View Details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <span className="text-destructive">Delete Contract</span>
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your contract and remove your data from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction>Continue</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
       },
     },
   ];
@@ -94,7 +192,7 @@ export default function UserContracts() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Toal Contracts
+              Total Contracts
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -195,12 +293,19 @@ export default function UserContracts() {
         </Button>
 
       </div>
+
+      <UploadModal
+      isOpen={isUploadModalOpen}
+      onClose={()=> setIsUploadModalOpen(false)}
+      onUploadComplete={()=> table.reset()}
+
+      />
     </div>
   );
 }
 
 async function fetchUserContracts(): Promise<ContractAnalysis[]> {
-  const response = await api.get("/contract/user-contracts");
+  const response = await api.get("/contracts/user-contracts");
 
   return response.data;
 }

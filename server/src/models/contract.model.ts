@@ -66,7 +66,22 @@ const ContractAnalysisSchema: Schema = new Schema({
   negotiationPoints: [{ type: String }],
   contractDuration: { type: String },
   terminationConditions: { type: String },
-  overallScore: { type: Number, min: 0, max: 100 },
+  
+  // Updated overallScore field to handle "N/A" or null values
+  overallScore: { 
+    type: Number, 
+    min: 0, 
+    max: 100,
+    default: null, // Allow null as default
+    validate: {
+      validator: function (value: any) {
+        // Allow null or valid numbers
+        return value === null || (!isNaN(value) && value >= 0 && value <= 100);
+      },
+      message: (props: { value: any }) => `"${props.value}" is not a valid overallScore. It must be a number between 0 and 100 or null.`,
+    }
+  },
+  
   compensationStructure: {
     baseSalary: String,
     bonuses: String,
@@ -102,7 +117,6 @@ const ContractAnalysisSchema: Schema = new Schema({
     description: String,
     details: [String],
   },
-  //   projectId: { type: Schema.Types.ObjectId, ref: "Project", required: true },
 });
 
 export default mongoose.model<IContractAnalysis>(
