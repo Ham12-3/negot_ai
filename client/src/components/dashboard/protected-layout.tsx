@@ -3,8 +3,16 @@
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Loader2, LockIcon } from "lucide-react";
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { Button } from "../ui/button";
+import Link from "next/link";
+import { useModalStore } from "@/store/zustand";
 
 export function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useCurrentUser();
@@ -30,6 +38,9 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default function AuthCard() {
+
+
+    const { openModal } = useModalStore()
   return (
     <Card className="w-full max-w-3xl mx-auto">
       <div className="flex flex-col sm:flex-row">
@@ -39,19 +50,27 @@ export default function AuthCard() {
 
         <div className="sm:w-3/4 p-4">
           <CardHeader className="space-y-1 px-0 pb-2">
-            <CardTitle className="text-2xl font-bold">Authentication required </CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              Authentication required{" "}
+            </CardTitle>
 
             <CardDescription>
-                You need to be logged in to access this page.
+              You need to be logged in to access this page.
             </CardDescription>
           </CardHeader>
           <CardContent className="px-0 py-2">
             <div className="flex flex-col sm:flex-row gap-2">
-<Button className="flex-1 " variant={"outline"}>
-    Continue with Google
-</Button>
+              <Button 
+              onClick={()=>openModal("connectAccountModal")}
+              className="flex-1 " variant={"outline"}>
+                Continue with Google
+              </Button>
+              <Link href={"/"} className="flex-1">
+                <Button className="w-full">
+                  Back to Home
+                </Button>
+              </Link>
             </div>
-
           </CardContent>
         </div>
       </div>
