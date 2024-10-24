@@ -5,7 +5,7 @@ export interface IUser extends Document {
     email:string;
     displayName: string;
     profilePicture: string;
-
+isPremium: boolean;
 }
 
 
@@ -27,7 +27,9 @@ const UserSchema:Schema = new Schema({
     profilePicture: {
         type: String,
         required: false
-    }
+    },
+isPremium: {type:Boolean, default:false}
+
 })
 
 

@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import User, { IUser } from "../models/user.model";
+import { sendPremiumConfirmationEmail } from "../services/email.service";
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2024-09-30.acacia",
 })
 
-export const createCharge = async(req:Request, res:Response) => {
+export const createCheckoutSession = async(req:Request, res:Response) => {
     const user = req.user as any
     try {
 
@@ -64,7 +65,18 @@ return res.status(400).send(`Webhook Error: ${error.message}`)
 
 
         if(userId) {
-            const user = await User.findByIdAndUpdate(userId)
+            const user = await User.findByIdAndUpdate(userId,
+                {isPremium: true},
+                {new: true}
+            )
+
+            if(user && user.email) {
+                await sendPremiumConfirmationEmail(user.email, user.displayName)
+            }
         }
     }
+
+
+  res.json({received: true});
+
 }

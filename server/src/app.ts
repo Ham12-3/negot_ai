@@ -16,6 +16,8 @@ import authRoutes from "./routes/auth";
 
 import contractsRoute from "./routes/contract"
 
+import paymentsRoute from "./routes/payments"
+
 // Initialize express app
 const app = express();
 
@@ -62,6 +64,8 @@ app.use(passport.session());
 app.use("/auth", authRoutes);
 
 app.use("/contracts", contractsRoute)
+
+app.use("/payments", paymentsRoute)
 
 // Set the port
 const PORT = 8080;
